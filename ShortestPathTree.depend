@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1462910519 source:/home/max/CBProjects/TIIT/ShortestPathTree/main.cpp
+	<iostream>
+	<vector>
+	<queue>
+	<fstream>
+	<algorithm>
+
