@@ -36,17 +36,15 @@ GraphType readGraphFromFile(string input)
 void shortestPathSearch(GraphType& graph, int startingVertex)
 {
     int graphSize = graph.size();
-    bool graphIsConnected = true;
 
     queue<int> que; //очередь готовящихся к посещению вершин
     vector<bool> visited(graphSize, false); //посещенные вершины
-    vector<int> length(graphSize); //длины кратчайших путей всех вершин
-    vector<int> parentVertex(graphSize); //родительская вершина для данной в результирующем дереве
 
     que.push(startingVertex);
     visited[startingVertex-1] = true;
-    length[startingVertex-1] = 0;
-    parentVertex[startingVertex-1] = -1;
+
+    //список смежности дерева кратчайших путей
+    GraphType adjacencyList(graphSize, vector<int> ());
 
     while (!que.empty())
         {
@@ -58,64 +56,21 @@ void shortestPathSearch(GraphType& graph, int startingVertex)
                         {
                             que.push(i+1); //добавляем в очередь вершины, связанные с текущей
                             visited[i] = true;
-                            length[i] = length[vertex-1] + 1;
-                            parentVertex[i] = vertex;
+
+                            //заполнение списка смежности
+                            adjacencyList[vertex-1].push_back(i+1);
+                            adjacencyList[i].push_back(vertex);
                         }
                 }
         }
 
-    //список смежности дерева кратчайших путей
-    GraphType adjacencyList(graphSize, vector<int> ());
-
-    //восстановление кратчайшего пути для каждой вершины
-    for (int i = 0; i < graphSize; i++)
+    for (auto i : visited)
+        if (!i)
         {
-            if (visited[i])
-                {
-                    vector<int> shortestPath;
-                    int parent = parentVertex[i];
-                    if (parent == -1)
-                        shortestPath.push_back(0);
-                    else
-                        shortestPath.push_back(i+1);
-
-                    while (parent != -1)
-                        {
-                            shortestPath.push_back(parent);
-                            parent = parentVertex[parent-1];
-                        }
-
-                    //заполнение списка смежности с использованием кратчайшего пути
-                    for (int m = 0; m < shortestPath.size()-1; m++)
-                        {
-                            bool containsStraight = false;
-                            bool containsReverse = false;
-                            //проверка на вхождение вершины в строку списка смежности
-                            if (shortestPath[m] > 0)
-                                {
-                                    for (int n : adjacencyList[shortestPath[m]-1])
-                                        if (n == shortestPath[m+1])
-                                            containsStraight = true;
-                                    for (auto l : adjacencyList[shortestPath[m+1]-1])
-                                        if (l == shortestPath[m])
-                                            containsReverse = true;
-                                }
-
-                            //добавление вершины m+1 как смежной вершине m
-                            if (!containsStraight)
-                                adjacencyList[shortestPath[m]-1].push_back(shortestPath[m+1]);
-                            //добавление вершины m как смежной вершине m+1
-                            if (!containsReverse)
-                                adjacencyList[shortestPath[m+1]-1].push_back(shortestPath[m]);
-                        }
-                }
-            else
-                graphIsConnected = false;
-            if (!graphIsConnected)
-            {
-                cout<<"Graph is disconnected! Shortest path tree can not be build properly."<<endl;
-                return;
-            }
+            cout<<"--------------------------------------------------------------------"<<endl;
+            cout<<"Graph is disconnected! Shortest-path tree can not be build properly."<<endl;
+            cout<<"--------------------------------------------------------------------"<<endl;
+            return;
         }
 
     //сортировка строк списка смежности
@@ -145,7 +100,7 @@ void readInteger(int& number)
         {
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout<<"Введено некорректное значение. Повторите ввод: ";
+            cout<<"Incorrect input. Enter another value: ";
             cin >> number;
         }
 }
@@ -196,7 +151,7 @@ int main()
                     char choice;
                     cout<<"Do you want to continue working with graph №"<<i+1<<"? y/n"<<endl;
                     cin>>choice;
-                    if (choice == 'n' || choice == 'n')
+                    if (choice == 'n' || choice == 'N')
                         break;
                 }
         }
